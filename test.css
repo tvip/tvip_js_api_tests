@@ -1,0 +1,60 @@
+ body {
+  background-color: white;
+  font-family: sans-serif;
+}
+
+h1 {
+  color: #004f94;
+}
+
+table {
+  width: 100%;
+  color: #004f94;
+  margin-bottom: 1em;
+}
+
+td{
+  padding: 1em;
+  max-width: 30%;
+}
+
+tr:nth-child(even) {
+  background-color: #e8e9e7;
+}
+
+tr:nth-child(odd) {
+  background-color: white;
+}
+
+.container {
+  margin-left: auto;
+  margin-right: auto; 
+  width: 80%;
+  padding: 1em;
+}
+
+.row_passed {
+}
+
+.row_failed {
+  font-weight: bold;
+}
+
+button {
+  background-color: #004f94;
+  color: white;
+  border: 1px solid #004f94;
+  padding: 1em;
+}
+
+button:disabled {
+  background-color: #e8e9e7;
+  color: white;
+  border: 1px solid #e8e9e7;
+}
+
+button:focus {
+  background-color: white;
+  color: #004f94;
+  border: 1px solid #004f94;
+}

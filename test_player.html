@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TVIP Player test</title>
+  <link rel="stylesheet" type="text/css" href="test_player.css">
+</head>
+<body>
+
+<div id="dash_upper">
+  <div id="dash_upper_inner">
+  video: 
+  <input id="v_track" type="number" size="2" value="-1" class="short_input">
+  audio: 
+  <input id="a_track" type="number" size="2" value="-1" class="short_input">
+  subtitles: 
+  <input id="s_track" type="number" size="2" value="-1" class="short_input">
+  <button class="butt" onclick="setTracks()">set tracks</button>
+  <input id="pos_input" type="number" size="10" value="-1" class="long_input">
+  <button class="butt" onclick="setPosition()">set position</button>
+  </div>
+  <p id="playback_info">Playback info: </p>
+</div>
+
+<div id="dash">
+  <button class="butt" onclick="toAll()">back to all tests</button>
+  <button class="butt" onclick="reset()">reset</button>
+  <button class="butt" onclick="play()">play</button>
+  <button class="butt" onclick="pause()">pause</button>
+  <button class="butt" onclick="unpause()">unpause</button>
+  <button class="butt" onclick="stop()">stop</button>
+  <button class="butt" onclick="seek()">seek to start</button>
+  <button class="butt" onclick="vol0()">vol 0%</button>
+  <button class="butt" onclick="vol50()">vol 50%</button>
+  <button class="butt" onclick="vol100()">vol 100%</button>
+  <button class="butt" onclick="mute()">mute</button>
+  <button class="butt" onclick="unmute()">unmute</button>
+  <br>
+
+
+  <p id="state">State: </p>
+  <p id="event">Last System Event: </p>
+
+</div>
+
+<script> 
+
+  var states = ["",
+  "starting",
+  "acquiring metadata",
+  "metadata received",
+  "init decoders",
+  "playing",
+  "end reached",
+  "stopping",
+  "stopped",
+  "paused",
+  "seeking",
+  "error"
+  ]
+
+  var updateInfoTimerId = null;
+  var currentState = 0
+
+  var mediaInfo = []
+
+  function playerStateChanged(oldState, newState) {
+    currentState = newState
+    fillState(states[oldState] + "->" + states[newState])
+    setTimeout(fillState, 1000, states[newState])
+    if(states[newState] == "playing") {
+      updateInfoTimerId = setInterval(updatePlaybackInfo, 1000)
+    } else if (states[newState] == "error" ||
+               states[newState] == "stopped" ||
+               states[newState] == "end reached") {
+      if(updateInfoTimerId) {
+        clearInterval(updateInfoTimerId)
+        updateInfoTimerId = null
+        playback_info = document.getElementById("playback_info")
+        playback_info.innerHTML = "Playback info: "
+      }
+      mediaInfo = []
+    }
+  }
+
+  function systemEvent(codename, args) {
+    fillEvent(codename)
+  }
+
+  function fillState(payload) {
+    state = document.getElementById("state");
+    state.innerHTML = "State: " + payload
+  }
+
+  function fillEvent(payload) {
+    event = document.getElementById("event");
+    event.innerHTML = "Last System Event: " + payload
+  }
+
+  function toAll() {
+    window.location = "test.html"
+  }
+
+  function reset() {
+    window.TvipPlayer.reset()
+  }
+
+  function play() {
+    inputVideoTrack = parseInt(document.getElementById("v_track").value)
+    inputAudioTrack = parseInt(document.getElementById("a_track").value)
+    inputSubtlTrack = parseInt(document.getElementById("s_track").value)
+    inputPosition = parseInt(document.getElementById("pos_input").value)
+
+    params = {
+      "audio_index" : inputAudioTrack,
+      "subtitle_index" : inputSubtlTrack,
+      "mode" : "live",
+      "position" : !isNaN(inputPosition) && inputPosition > 0 ? inputPosition : undefined
+    }
+
+    if(isNaN(inputAudioTrack) || isNaN(inputSubtlTrack)) params = null
+    if(inputAudioTrack < 0 || inputSubtlTrack < 0) params = null
+
+    window.TvipPlayer.setVideoWindow(0,0,1920,1080, false)
+    if(params) {
+      window.TvipPlayer.playUrl(generateVideoUrl("amedia.ts"), params)
+    } else {
+      window.TvipPlayer.playUrl(generateVideoUrl("amedia.ts"),/*"live"*/ {"mode": "live", "subtitle_language" : "rus", "audio_language" : "eng"})
+    }
+  }
+
+  function pause() {
+    window.TvipPlayer.pause()    
+  }
+
+  function unpause() {
+    window.TvipPlayer.unpause()
+  }
+
+  function stop() {
+    window.TvipPlayer.stop()
+  }
+
+  function seek() {
+    window.TvipPlayer.seek(window.TvipPlayer.getMinPositionMsec())
+  }
+
+  function vol0() {
+    window.TvipPlayer.setVolume(0)
+  }
+
+  function vol50() {
+    window.TvipPlayer.setVolume(50)
+  }
+
+  function vol100() {
+    win
+    dow.TvipPlayer.setVolume(100)
+  }
+
+  function mute() {
+    window.TvipPlayer.setMute(true)
+  }
+
+  function unmute() {
+    window.TvipPlayer.setMute(false)
+  }
+
+  function onloadHandler() {
+    window.TvipStb.enableSpatialNavigation(true)
+    window.TvipEvent.onPlayerStateChange = playerStateChanged
+    window.TvipEvent.onSystemEvent = systemEvent
+  }
+
+  function generateVideoUrl(videoRelativePath) {
+    return window.location.origin + window.location.pathname.slice(0, window.location.pathname.lastIndexOf("/"))
+    + "/" + videoRelativePath
+  }
+
+  function setTracks() {
+    try
+    {
+      inputVideoTrack = parseInt(document.getElementById("v_track").value)
+      inputAudioTrack = parseInt(document.getElementById("a_track").value)
+      inputSubtlTrack = parseInt(document.getElementById("s_track").value)
+
+      if(states[currentState] != "playing") return;
+      if(mediaInfo.length == 0) return;
+
+      if(inputVideoTrack > mediaInfo.length) return;
+      if(inputAudioTrack > mediaInfo.length) return;
+      if(inputSubtlTrack > mediaInfo.length) return;
+
+      if(inputAudioTrack >= 0) window.TvipPlayer.setCurrentAudioStreamIndex(inputAudioTrack)
+      if(inputSubtlTrack >= 0) window.TvipPlayer.setCurrentSubtitleStreamIndex(inputSubtlTrack)
+    } catch(error) {
+      document.getElementById("state").innerHTML = error
+    }
+  }
+
+  function setPosition() {
+    inputPosition = parseInt(document.getElementById("pos_input").value)
+    if(isNaN(inputPosition)) return
+    if(inputPosition <= 0) return
+
+    window.TvipPlayer.seek(inputPosition)
+  }
+
+  function updatePlaybackInfo() {
+    url = window.TvipPlayer.getCurrentUrl()
+    urlMode = window.TvipPlayer.getCurrentUrlMode()
+    minPos = window.TvipPlayer.getMinPositionMsec()
+    maxPos = window.TvipPlayer.getMaxPositionMsec()
+    currentPos = window.TvipPlayer.getCurrentPositionMsec()
+    vol = window.TvipPlayer.getVolume()
+    muteState = window.TvipPlayer.getMute()
+    container = window.TvipPlayer.getContainerType()
+    numOfStreams = window.TvipPlayer.getStreamsCount()
+    currentVideo = window.TvipPlayer.getCurrentVideoStreamIndex()
+    currentAudio = window.TvipPlayer.getCurrentAudioStreamIndex()
+    currentSubt = window.TvipPlayer.getCurrentSubtitleStreamIndex()
+
+    inputVideoTrack = parseInt(document.getElementById("v_track").value)
+    inputAudioTrack = parseInt(document.getElementById("a_track").value)
+    inputSubtlTrack = parseInt(document.getElementById("s_track").value)
+    inputPosition = parseInt(document.getElementById("pos_input").value)
+
+    if(currentVideo >= 0 && inputVideoTrack < 0) document.getElementById("v_track").value = currentVideo
+    if(currentAudio >= 0 && inputAudioTrack < 0) document.getElementById("a_track").value = currentAudio
+    if(currentSubt >= 0 && inputSubtlTrack < 0) document.getElementById("s_track").value = currentSubt
+    if(inputPosition < minPos || inputPosition > maxPos) document.getElementById("pos_input").value = currentPos
+
+
+    var output = "URL: " + url + " mode: " + urlMode + "<br>"
+    output += "Min position: " + minPos + " Max position: " + maxPos + "<br>"
+    output += "Current position: " + currentPos + "<br>"
+    output += "Volume: " + vol + " Mute: " + muteState + "<br>"
+    output += "Media container: " + container + "<br>"
+    output += "Number of streams: " + numOfStreams + "<br>"
+    output += "Current video: " + currentVideo + " audio: " + currentAudio + " subtitles: " + currentSubt + "<br>"
+
+    output += "Media info: <br>"
+    for(i = 0; i < numOfStreams; ++i) {
+      stream = window.TvipPlayer.getStreamInfo(i)
+      mediaInfo.push(stream)
+      output += i + ": " + JSON.stringify(stream) + "<br>"
+    }
+
+    playback_info = document.getElementById("playback_info")
+    playback_info.innerHTML = "Playback info: <br>" + output
+  }
+
+  window.onload = onloadHandler
+</script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TVIP JS API test page</title>
+  <script type="text/javascript" src="test.js"></script>
+  <link rel="stylesheet" type="text/css" href="test.css">
+</head>
+<body>
+  <div class="container">
+    <h1> TVIP JavaScript API tests </h1>
+    <button disabled id="browser" onclick="onBrowser()">Browser</button>
+    <button disabled id="home" onclick="onHome()">Home</button>
+    <button disabled id="prefs" onclick="onPrefs()">Preferences</button>
+    <button disabled id="keyboard" onclick="onKeyboard()">Virtual Keyboard</button>
+    <button disabled id="standby" onclick="onStandby()">Stand By</button>
+    <button disabled id="reboot" onclick="onReboot()">System Reboot</button>
+    <button disabled id="player" onclick="onPlayer()">Player</button>
+    <button disabled id="window" onclick="onWindow()">Window</button>
+    <button disabled id="launchuri" onclick="onLaunchUri()">Youtube</button>
+    <button disabled id="langru" onclick="onLangRu()">Set RU lang</button>
+    <button disabled id="langen" onclick="onLangEn()">Set EN lang</button>
+    <table>
+      <tbody id="stb"><tr class="table_header"><td>Name</td><td>Status</td><td>Input</td><td>Output</td><td>Expected</td></tr></tbody>
+    </table>
+
+  </div>
+<script> 
+
+  function onBrowser() {
+    window.TvipStb.launchBrowser("test.html", "test.html")
+  }
+
+  function onHome() {
+    window.TvipStb.launchHomeScreen()
+  }
+
+  function onPrefs() {
+    window.TvipStb.launchPreferences()
+  }
+
+  function onKeyboard() {
+    window.TvipStb.showVirtualKeyboard(true)
+    setTimeout(window.TvipStb.showVirtualKeyboard, 1500, false)
+  }
+
+  function onStandby() {
+    window.TvipStb.setStandBy(true)
+    setTimeout(window.TvipStb.setStandBy, 3000, false)
+  }
+
+  function onReboot() {
+    window.TvipStb.rebootSystem()
+  }
+
+  function onPlayer() {
+    window.location = "test_player.html"
+  }
+
+  function onWindow() {
+    // var w = window.TvipStb.windowOpenNew("test_player.html")
+    // setTimeout(window.TvipStb.windowClose, 5000, w)
+    setTimeout(window.TvipStb.windowSetScrollPosition, 1000, 1, 0)
+    setTimeout(window.TvipStb.windowResize, 2000, 1, 0, 0, 720, 576)
+    setTimeout(window.TvipStb.windowResize, 3000, 1, 0, 0, 1280, 720)
+  }
+
+  function onLaunchUri() {
+    window.TvipStb.execSystemUri("youtube");
+  }
+  
+  function onLangRu() {
+    TvipStb.setCurrentLanguageCode("ru");
+    location.reload();
+  }
+  
+  function onLangEn() {
+    TvipStb.setCurrentLanguageCode("en");
+    location.reload();
+  }
+
+  function started(result) {
+    if(!(result instanceof TestResult)) return
+  }
+
+  function passed(result) {
+    if(!(result instanceof TestResult)) return
+    document.getElementById("stb").insertAdjacentHTML("beforeend", "<tr class='row_passed'><td>"+result.name+"</td><td>"+result.status+"</td><td>"+result.input+"</td><td>"+result.populated+"</td><td>"+result.expected+"</td></tr>")
+  }
+
+  function failed(result) {
+    if(!(result instanceof TestResult)) return
+    document.getElementById("stb").insertAdjacentHTML("beforeend","<tr class='row_failed'><td>"+result.name+"</td><td>"+result.status+"</td><td>"+result.input+"</td><td>"+result.populated+"</td><td>"+result.expected+"</td></tr>")
+  }
+
+  function dotest() {
+    var test = new TvipApiTest(started, passed, failed)
+    test.run()
+    if(test.spatial) {
+      window.TvipStb.enableSpatialNavigation(true)
+      if(typeof window.TvipPlayer !== "undefined") {
+        document.getElementById("player").disabled = false
+      }
+    }
+    if(test.prefs) {
+      document.getElementById("prefs").disabled = false
+    }
+    if(test.browser) {
+      document.getElementById("browser").disabled = false
+    }
+    if(test.homeScreen) {
+      document.getElementById("home").disabled = false
+    }
+    if(test.reboot) {
+      document.getElementById("reboot").disabled = false
+    }
+    if(test.standby) {
+      document.getElementById("standby").disabled = false
+    }
+    if(test.keyboard) {
+      document.getElementById("keyboard").disabled = false
+    }
+    if(test.windowResize && test.windowScroll) {
+      document.getElementById("window").disabled = false
+    }
+    if(test.uri) {
+      document.getElementById("launchuri").disabled = false
+    }
+    if(test.setlang) {
+      document.getElementById("langru").disabled = false
+      document.getElementById("langen").disabled = false
+    }
+  }
+
+  window.onload = dotest 
+</script>
+</body>
+</html>

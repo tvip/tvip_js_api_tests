@@ -1,0 +1,76 @@
+ body {
+  /*background-color: white;*/
+  font-family: sans-serif;
+  color: white;
+}
+
+h1 {
+  color: #004f94;
+}
+
+#dash {
+  /*padding: -0.5em;*/
+  /*border: 1px solid #004f94;*/
+  position: absolute;
+  bottom: 0;
+  height: 15em;
+  margin: 0 auto;
+}
+
+#dash_upper {
+  /*padding: -0.5em;*/
+  /*border: 1px solid #004f94;*/
+  width: 80%;
+  position: absolute;
+  top: 0;
+  height: 15em;
+  margin: 0 auto;
+  padding: 1em;
+}
+
+#dash_upper_inner {
+  padding: 1em;
+}
+
+.butt:focus {
+  background-color: rgba(0,0,0,0.8);
+  border: 1px solid transparent;
+  color: rgba(255,255,255,1.0);
+}
+
+.butt:hover {
+  background-color: rgba(0,0,0,0.8);
+  border: 1px solid transparent;
+  color: rgba(255,255,255,1.0);
+}
+
+.butt{
+  background-color: rgba(0,0,0,0.5);
+  color: white;
+  /*border-radius: 1em;*/
+  border: 1px solid transparent;
+  padding: 1em;
+  margin: 0.125em 0.125em;
+}
+
+p {
+  background-color: rgba(0,0,0,0.5);
+  padding: 1em;
+  width: 40%;
+}
+
+.short_input {
+  background-color: rgba(255, 255, 255, 0.3);
+  border: 1px solid transparent;
+  color: white;
+  width: 2em;
+  padding: 1em;
+}
+
+.long_input {
+  background-color: rgba(255, 255, 255, 0.3);
+  border: 1px solid transparent;
+  color: white;
+  width: 12em;
+  padding: 1em;
+}
